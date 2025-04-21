@@ -35,8 +35,12 @@ func (r *Relation) Equals(r2 *Relation) bool {
 }
 
 func (r *Relation) String() string {
+	return getFormattedFunctionalDependencies(r.functionalDependencies)
+}
+
+func getFormattedFunctionalDependencies(deps []*functionalDependency) string {
 	builder := strings.Builder{}
-	for _, i := range r.functionalDependencies {
+	for _, i := range deps {
 		builder.WriteString(fmt.Sprintf("%v -> %v\n", i.Determinant.GetElementsOrdered(), i.Attributes.GetElementsOrdered()))
 	}
 	return builder.String()

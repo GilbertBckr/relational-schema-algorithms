@@ -100,3 +100,24 @@ func TestOrderedItems(t *testing.T) {
 	}
 
 }
+
+func TestIsEmpty(t *testing.T) {
+	set := New()
+
+	if !set.IsEmpty() {
+		t.Fatalf("Set was not marked as empty")
+	}
+
+	set.Add("A")
+
+	if set.IsEmpty() {
+		t.Fatalf("Set was not marked as not empty")
+	}
+
+	set.Remove("A")
+
+	if !set.IsEmpty() {
+		t.Fatalf("Set was not marked as empty")
+	}
+
+}

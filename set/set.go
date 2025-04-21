@@ -108,3 +108,12 @@ func (s *Set) AddUnion(s2 *Set) {
 func (s *Set) string() string {
 	return fmt.Sprintf("%v", s.GetElementsOrdered())
 }
+
+func (s *Set) IsEmpty() bool {
+	for _, v := range s.items {
+		if v {
+			return false
+		}
+	}
+	return true
+}

@@ -1,6 +1,15 @@
 package fdependency
 
-func (r *Relation) LeftReduction() {
+import ()
+
+func (r *Relation) CanonicalCover() {
+	r.leftReduction()
+	r.rightReduction()
+	r.removeEmptyDependencies()
+	r.mergeRulesWithSameDeterminant()
+}
+
+func (r *Relation) leftReduction() {
 
 	for _, dependency := range r.functionalDependencies {
 		leftReduceDependency(dependency, r)
@@ -44,4 +53,41 @@ func rightReduceDependency(dependency *functionalDependency, index int, function
 		}
 
 	}
+}
+
+// Removes empty rules from the relation which follow the following format Ψ-> Ø
+func (r *Relation) removeEmptyDependencies() {
+	// TODO: make more efficient memory allocation wise
+	strippedRules := make([]*functionalDependency, 0, len(r.functionalDependencies))
+
+	for _, dependency := range r.functionalDependencies {
+		if !dependency.Attributes.IsEmpty() {
+			strippedRules = append(strippedRules, dependency)
+		}
+	}
+
+	r.functionalDependencies = strippedRules
+
+}
+
+func (r *Relation) mergeRulesWithSameDeterminant() {
+	// TODO: make more efficient memory allocation wise
+	mergedRules := make([]*functionalDependency, 0, len(r.functionalDependencies))
+
+	// TODO: make more efficient time complexity wise
+OUTER:
+	for _, rule := range r.functionalDependencies {
+		for _, mergedRule := range mergedRules {
+			if mergedRule.Determinant.Equals(&rule.Determinant) {
+				mergedRule.Attributes.AddUnion(&rule.Attributes)
+				continue OUTER
+			}
+		}
+
+		mergedRules = append(mergedRules, rule)
+
+	}
+
+	r.functionalDependencies = mergedRules
+
 }

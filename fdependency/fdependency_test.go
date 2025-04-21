@@ -57,7 +57,7 @@ func TestLeftReduction(t *testing.T) {
 
 	r := NewRelation(attributes, []*functionalDependency{dep1, dep2, dep3, dep4, dep5})
 
-	r.LeftReduction()
+	r.leftReduction()
 
 	reducedDep1 := NewDepedency(*set.NewFromElements([]string{"A"}), *set.NewFromElements([]string{"B", "E"}))
 
@@ -99,6 +99,88 @@ func TestRightReduction(t *testing.T) {
 
 	if !exp.Equals(r) {
 		t.Fatalf("Relation is not properly right reduced \n%s", r.String())
+	}
+
+}
+
+func TestRemoveEmptyRules(t *testing.T) {
+	attributes := set.NewFromElements([]string{"A", "B", "C", "D", "E", "F"})
+
+	dep1 := NewDepedency(*set.NewFromElements([]string{"A"}), *set.NewFromElements([]string{"B", "E"}))
+
+	dep2 := NewDepedency(*set.NewFromElements([]string{"A"}), *set.NewFromElements([]string{"B", "D"}))
+	dep3 := NewDepedency(*set.NewFromElements([]string{"F"}), *set.NewFromElements([]string{"C", "D"}))
+	dep4 := NewDepedency(*set.NewFromElements([]string{"C", "D"}), *set.NewFromElements([]string{"B", "E", "F"}))
+	dep5 := NewDepedency(*set.NewFromElements([]string{"F"}), *set.NewFromElements([]string{}))
+
+	r := NewRelation(attributes, []*functionalDependency{dep1, dep2, dep3, dep4, dep5})
+
+	r.removeEmptyDependencies()
+
+	reduceddep1 := NewDepedency(*set.NewFromElements([]string{"A"}), *set.NewFromElements([]string{"B", "E"}))
+
+	reduceddep2 := NewDepedency(*set.NewFromElements([]string{"A"}), *set.NewFromElements([]string{"B", "D"}))
+	reduceddep3 := NewDepedency(*set.NewFromElements([]string{"F"}), *set.NewFromElements([]string{"C", "D"}))
+	reduceddep4 := NewDepedency(*set.NewFromElements([]string{"C", "D"}), *set.NewFromElements([]string{"E", "F", "B"}))
+
+	exp := NewRelation(attributes, []*functionalDependency{reduceddep1, reduceddep2, reduceddep3, reduceddep4})
+
+	if !exp.Equals(r) {
+		t.Fatalf("Empty rule was not removed \n%s", r.String())
+	}
+
+}
+
+func TestMergeRule(t *testing.T) {
+	attributes := set.NewFromElements([]string{"A", "B", "C", "D", "E", "F"})
+
+	dep1 := NewDepedency(*set.NewFromElements([]string{"A"}), *set.NewFromElements([]string{"B", "E"}))
+
+	dep2 := NewDepedency(*set.NewFromElements([]string{"A"}), *set.NewFromElements([]string{"B", "D"}))
+	dep3 := NewDepedency(*set.NewFromElements([]string{"F"}), *set.NewFromElements([]string{"C", "D"}))
+	dep4 := NewDepedency(*set.NewFromElements([]string{"C", "D"}), *set.NewFromElements([]string{"B", "E", "F"}))
+	dep5 := NewDepedency(*set.NewFromElements([]string{"F"}), *set.NewFromElements([]string{"B"}))
+
+	r := NewRelation(attributes, []*functionalDependency{dep1, dep2, dep3, dep4, dep5})
+
+	r.mergeRulesWithSameDeterminant()
+
+	mergeddep1 := NewDepedency(*set.NewFromElements([]string{"A"}), *set.NewFromElements([]string{"B", "D", "E"}))
+
+	mergeddep2 := NewDepedency(*set.NewFromElements([]string{"F"}), *set.NewFromElements([]string{"C", "D", "B"}))
+	mergeddep3 := NewDepedency(*set.NewFromElements([]string{"C", "D"}), *set.NewFromElements([]string{"E", "F", "B"}))
+
+	exp := NewRelation(attributes, []*functionalDependency{mergeddep1, mergeddep2, mergeddep3})
+
+	if !exp.Equals(r) {
+		t.Fatalf("rules were not properly merged \n%s", r.String())
+	}
+
+}
+
+func TestCanonicalCover(t *testing.T) {
+	attributes := set.NewFromElements([]string{"A", "B", "C", "D", "E", "F"})
+
+	dep1 := NewDepedency(*set.NewFromElements([]string{"A"}), *set.NewFromElements([]string{"B", "E"}))
+
+	dep2 := NewDepedency(*set.NewFromElements([]string{"A", "E"}), *set.NewFromElements([]string{"B", "D"}))
+	dep3 := NewDepedency(*set.NewFromElements([]string{"F"}), *set.NewFromElements([]string{"C", "D"}))
+	dep4 := NewDepedency(*set.NewFromElements([]string{"C", "D"}), *set.NewFromElements([]string{"B", "E", "F"}))
+	dep5 := NewDepedency(*set.NewFromElements([]string{"C", "F"}), *set.NewFromElements([]string{"B"}))
+
+	r := NewRelation(attributes, []*functionalDependency{dep1, dep2, dep3, dep4, dep5})
+
+	r.CanonicalCover()
+
+	mergeddep1 := NewDepedency(*set.NewFromElements([]string{"A"}), *set.NewFromElements([]string{"B", "D", "E"}))
+
+	mergeddep2 := NewDepedency(*set.NewFromElements([]string{"F"}), *set.NewFromElements([]string{"C", "D", "B"}))
+	mergeddep3 := NewDepedency(*set.NewFromElements([]string{"C", "D"}), *set.NewFromElements([]string{"E", "F"}))
+
+	exp := NewRelation(attributes, []*functionalDependency{mergeddep1, mergeddep2, mergeddep3})
+
+	if !exp.Equals(r) {
+		t.Fatalf("canonical cover was not computed correctly \n%s", r.String())
 	}
 
 }
