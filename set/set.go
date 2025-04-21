@@ -89,7 +89,7 @@ func (s *Set) DeepCopy() *Set {
 	return set
 }
 
-func (s *Set) Equal(s2 *Set) bool {
+func (s *Set) Equals(s2 *Set) bool {
 	// There is a more efficient way but this is cool because it closely mimick the mathematical definition for Set equality
 	return s.IsSubSet(s2) && s2.IsSubSet(s)
 }

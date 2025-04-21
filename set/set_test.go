@@ -8,9 +8,9 @@ import (
 func TestAddItem(t *testing.T) {
 	set := New()
 
-	set.add("hello")
+	set.Add("hello")
 
-	if !set.contains("hello") {
+	if !set.Contains("hello") {
 		t.Errorf("Set does not contain 'hello'")
 	}
 }
@@ -18,11 +18,11 @@ func TestAddItem(t *testing.T) {
 func TestRemoveItem(t *testing.T) {
 	set := New()
 
-	set.add("hello")
+	set.Add("hello")
 
-	set.remove("hello")
+	set.Remove("hello")
 
-	if set.contains("hello") {
+	if set.Contains("hello") {
 		t.Errorf("Set does not contain 'hello'")
 	}
 }
@@ -31,7 +31,7 @@ func TestEmptySubset(t *testing.T) {
 	set1 := New()
 	set2 := New()
 
-	if !set1.isSubset(set2) {
+	if !set1.IsSubSet(set2) {
 		t.Fatalf("Empty subset is not subset of empty set")
 	}
 }
@@ -39,42 +39,42 @@ func TestEmptySubset(t *testing.T) {
 func TestNonEmptySubsetOfEmpty(t *testing.T) {
 	empty := New()
 	set2 := New()
-	set2.add("A")
+	set2.Add("A")
 
-	if !empty.isSubset(set2) {
+	if !empty.IsSubSet(set2) {
 		t.Fatalf("empty is not subset of {A}")
 	}
-	if set2.isSubset(empty) {
+	if set2.IsSubSet(empty) {
 		t.Fatalf("empty is not subset of {A}")
 	}
 }
 func TestEqualNonEmpty(t *testing.T) {
 	set1 := New()
-	set1.add("A")
-	set1.add("B")
+	set1.Add("A")
+	set1.Add("B")
 	set2 := New()
-	set2.add("A")
-	set2.add("B")
+	set2.Add("A")
+	set2.Add("B")
 
-	if !set1.isSubset(set2) {
+	if !set1.IsSubSet(set2) {
 		t.Fatalf("{A, B} is subset of {A, B}")
 	}
-	if !set2.isSubset(set1) {
+	if !set2.IsSubSet(set1) {
 		t.Fatalf("{A, B} is subset of {A, B}")
 	}
 }
 
 func TestTrueSubset(t *testing.T) {
 	set1 := New()
-	set1.add("A")
+	set1.Add("A")
 	set2 := New()
-	set2.add("A")
-	set2.add("B")
+	set2.Add("A")
+	set2.Add("B")
 
-	if !set1.isSubset(set2) {
+	if !set1.IsSubSet(set2) {
 		t.Fatalf("{A} is subset of {A, B}")
 	}
-	if set2.isSubset(set1) {
+	if set2.IsSubSet(set1) {
 		t.Fatalf("{A, B} is not subset of {A}")
 	}
 }
@@ -82,20 +82,20 @@ func TestTrueSubset(t *testing.T) {
 func TestOrderedItems(t *testing.T) {
 	set := New()
 
-	if len(set.getElementsOrdered()) != 0 {
+	if len(set.GetElementsOrdered()) != 0 {
 		t.Fatalf("Slice should be empty")
 	}
 
-	set.add("A")
+	set.Add("A")
 
-	if !reflect.DeepEqual(set.getElementsOrdered(), []string{"A"}) {
+	if !reflect.DeepEqual(set.GetElementsOrdered(), []string{"A"}) {
 		t.Fatal("Sorted elements are not equal to [A]")
 	}
 
-	set.add("C")
-	set.add("B")
+	set.Add("C")
+	set.Add("B")
 
-	if !reflect.DeepEqual(set.getElementsOrdered(), []string{"A", "B", "C"}) {
+	if !reflect.DeepEqual(set.GetElementsOrdered(), []string{"A", "B", "C"}) {
 		t.Fatal("Sorted elements are not equal to [A,B,C]")
 	}
 
