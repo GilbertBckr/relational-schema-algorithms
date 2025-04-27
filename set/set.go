@@ -3,6 +3,7 @@ package set
 import (
 	"fmt"
 	"sort"
+	"strings"
 )
 
 type Set struct {
@@ -105,8 +106,24 @@ func (s *Set) AddUnion(s2 *Set) {
 
 }
 
-func (s *Set) string() string {
-	return fmt.Sprintf("%v", s.GetElementsOrdered())
+func (s *Set) String() string {
+
+	builder := strings.Builder{}
+	builder.WriteString("{")
+
+	orderedElements := s.GetElementsOrdered()
+
+	if len(orderedElements) >= 1 {
+		builder.WriteString(orderedElements[0])
+		for _, elem := range orderedElements[1:] {
+			builder.WriteString(fmt.Sprintf(", %s", elem))
+		}
+	}
+
+	builder.WriteString("}")
+
+	return builder.String()
+
 }
 
 func (s *Set) IsEmpty() bool {
@@ -116,4 +133,15 @@ func (s *Set) IsEmpty() bool {
 		}
 	}
 	return true
+}
+
+func (s1 *Set) Subtract(s2 *Set) {
+	// TODO: check if iterating over s2 is faster
+
+	for _, elem := range s1.GetElementsOrdered() {
+		if s2.Contains(elem) {
+			s1.Remove(elem)
+		}
+	}
+
 }

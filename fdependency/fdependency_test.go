@@ -1,6 +1,7 @@
 package fdependency
 
 import (
+	"reflect"
 	"relational-algorithms/set"
 	"testing"
 )
@@ -181,6 +182,27 @@ func TestCanonicalCover(t *testing.T) {
 
 	if !exp.Equals(r) {
 		t.Fatalf("canonical cover was not computed correctly \n%s", r.String())
+	}
+
+}
+func TestCandidateKey(t *testing.T) {
+	attributes := set.NewFromElements([]string{"A", "B", "C", "D", "E", "F"})
+
+	dep1 := NewDepedency(*set.NewFromElements([]string{"A"}), *set.NewFromElements([]string{"B", "E"}))
+
+	dep2 := NewDepedency(*set.NewFromElements([]string{"A", "E"}), *set.NewFromElements([]string{"B", "D"}))
+	dep3 := NewDepedency(*set.NewFromElements([]string{"F"}), *set.NewFromElements([]string{"C", "D"}))
+	dep4 := NewDepedency(*set.NewFromElements([]string{"C", "D"}), *set.NewFromElements([]string{"B", "E", "F"}))
+	dep5 := NewDepedency(*set.NewFromElements([]string{"C", "F"}), *set.NewFromElements([]string{"B"}))
+
+	r := NewRelation(attributes, []*functionalDependency{dep1, dep2, dep3, dep4, dep5})
+
+	candidateKeys := r.CandidateKeys()
+
+	exp := []*set.Set{set.NewFromElements([]string{"A", "C"}), set.NewFromElements([]string{"A", "F"})}
+
+	if !reflect.DeepEqual(candidateKeys, exp) {
+		t.Fatalf("candidate key was not computer correctly \n%s", candidateKeys)
 	}
 
 }

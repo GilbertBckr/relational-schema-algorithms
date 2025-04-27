@@ -48,6 +48,22 @@ func TestNonEmptySubsetOfEmpty(t *testing.T) {
 		t.Fatalf("empty is not subset of {A}")
 	}
 }
+
+func TestSubset(t *testing.T) {
+	set1 := New()
+	set1.Add("A")
+	set1.Add("F")
+	set2 := New()
+	set2.Add("A")
+	set2.Add("D")
+	set2.Add("F")
+	set2.Add("E")
+
+	if !set1.IsSubSet(set2) {
+		t.Fatalf("%s is subset of %s", set1.String(), set2.String())
+	}
+}
+
 func TestEqualNonEmpty(t *testing.T) {
 	set1 := New()
 	set1.Add("A")

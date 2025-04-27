@@ -6,4 +6,9 @@ import (
 
 func main() {
 	fmt.Println("Hello world")
+
+	slic := []string{"hellO"}
+
+	fmt.Println(slic[0:])
+
 }
