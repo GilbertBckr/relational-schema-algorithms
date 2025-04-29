@@ -1,6 +1,9 @@
 package fdependency
 
-import ()
+import (
+	"fmt"
+	"slices"
+)
 
 func (r *Relation) CanonicalCover() {
 	r.leftReduction()
@@ -17,7 +20,7 @@ func (r *Relation) leftReduction() {
 
 }
 
-func leftReduceDependency(dependency *functionalDependency, r *Relation) {
+func leftReduceDependency(dependency *FunctionalDependency, r *Relation) {
 	for _, attribute := range dependency.Determinant.GetElementsOrdered() {
 		newDeterminants := dependency.Determinant.DeepCopy()
 		newDeterminants.Remove(attribute)
@@ -37,8 +40,8 @@ func (r *Relation) rightReduction() {
 	}
 }
 
-func rightReduceDependency(dependency *functionalDependency, index int, functionalDependencies []*functionalDependency) {
-	sliceCopy := make([]*functionalDependency, len(functionalDependencies))
+func rightReduceDependency(dependency *FunctionalDependency, index int, functionalDependencies []*FunctionalDependency) {
+	sliceCopy := make([]*FunctionalDependency, len(functionalDependencies))
 	copy(sliceCopy, functionalDependencies)
 	for _, psi := range dependency.Attributes.GetElementsOrdered() {
 		newAttributes := dependency.Attributes.DeepCopy()
@@ -58,7 +61,7 @@ func rightReduceDependency(dependency *functionalDependency, index int, function
 // Removes empty rules from the relation which follow the following format Ψ-> Ø
 func (r *Relation) removeEmptyDependencies() {
 	// TODO: make more efficient memory allocation wise
-	strippedRules := make([]*functionalDependency, 0, len(r.functionalDependencies))
+	strippedRules := make([]*FunctionalDependency, 0, len(r.functionalDependencies))
 
 	for _, dependency := range r.functionalDependencies {
 		if !dependency.Attributes.IsEmpty() {
@@ -72,7 +75,7 @@ func (r *Relation) removeEmptyDependencies() {
 
 func (r *Relation) mergeRulesWithSameDeterminant() {
 	// TODO: make more efficient memory allocation wise
-	mergedRules := make([]*functionalDependency, 0, len(r.functionalDependencies))
+	mergedRules := make([]*FunctionalDependency, 0, len(r.functionalDependencies))
 
 	// TODO: make more efficient time complexity wise
 OUTER:
@@ -90,4 +93,38 @@ OUTER:
 
 	r.functionalDependencies = mergedRules
 
+}
+
+func (r *Relation) addKeysToFunctionalDependency() {
+	for _, v := range r.functionalDependencies {
+		v.Attributes.AddUnion(&v.Determinant)
+	}
+}
+
+// Removes functional dependencies whose total attributes (det + att) are the subset of another fd
+func (r *Relation) removeFDwithSameSet() {
+
+	i := 0
+
+	// This code is very inefficient because premature optimization is the root of all evil
+OUTER:
+	for i < len(r.functionalDependencies) {
+		fd := r.functionalDependencies[i]
+
+		for _, fd2 := range r.functionalDependencies {
+			if fd2 == fd {
+				continue
+			}
+			if fd.getFullSet().IsSubSet(fd2.getFullSet()) {
+				fmt.Println("Removing ", i)
+				r.functionalDependencies = slices.Delete(r.functionalDependencies, i, i+1)
+				continue OUTER
+			}
+		}
+		i++
+	}
+
+}
+func removeFromSliceInefficient(slice []*FunctionalDependency, s int) []*FunctionalDependency {
+	return append(slice[:s], slice[s+1:]...)
 }

@@ -8,22 +8,32 @@ import (
 	"strings"
 )
 
-type functionalDependency struct {
+type FunctionalDependency struct {
 	Determinant set.Set
 	Attributes  set.Set
 }
 
-func NewDepedency(determinant set.Set, attributes set.Set) *functionalDependency {
-	return &functionalDependency{determinant, attributes}
+func (f *FunctionalDependency) getFullSet() *set.Set {
+	res := f.Determinant.DeepCopy()
+	res.AddUnion(&f.Attributes)
+	return res
+}
+
+func (f *FunctionalDependency) Equals(f2 *FunctionalDependency) bool {
+	return f.Attributes.Equals(&f2.Attributes) && f.Determinant.Equals(&f2.Determinant)
+}
+
+func NewDepedency(determinant set.Set, attributes set.Set) *FunctionalDependency {
+	return &FunctionalDependency{determinant, attributes}
 }
 
 type Relation struct {
 	attributes set.Set
 	// We make this a slice and not a set since the order can play a role for some algorithms
-	functionalDependencies []*functionalDependency
+	functionalDependencies []*FunctionalDependency
 }
 
-func NewRelation(attributes *set.Set, deps []*functionalDependency) *Relation {
+func NewRelation(attributes *set.Set, deps []*FunctionalDependency) *Relation {
 	return &Relation{
 		attributes:             *attributes,
 		functionalDependencies: deps,
@@ -39,7 +49,7 @@ func (r *Relation) String() string {
 	return getFormattedFunctionalDependencies(r.functionalDependencies)
 }
 
-func getFormattedFunctionalDependencies(deps []*functionalDependency) string {
+func getFormattedFunctionalDependencies(deps []*FunctionalDependency) string {
 	builder := strings.Builder{}
 	for _, i := range deps {
 		builder.WriteString(fmt.Sprintf("%v -> %v\n", i.Determinant.GetElementsOrdered(), i.Attributes.GetElementsOrdered()))
@@ -52,7 +62,7 @@ func (r *Relation) Hull(determinants *set.Set) *set.Set {
 	return Hull(determinants, r.functionalDependencies)
 }
 
-func Hull(determinants *set.Set, functionalDependencies []*functionalDependency) *set.Set {
+func Hull(determinants *set.Set, functionalDependencies []*FunctionalDependency) *set.Set {
 	hull := determinants.DeepCopy()
 
 	// basically graph search right?
@@ -128,6 +138,9 @@ func setIsSubsetOfInSlice(s *set.Set, slice []*set.Set) bool {
 
 // expects base to be a sublist of olist2, expects both lists to be ordered
 func getHighestIndex(base []string, olist2 []string) int {
+	if len(base) == 0 {
+		return 0
+	}
 	return min(slices.Index(olist2, base[len(base)-1])+1, len(olist2))
 }
 
